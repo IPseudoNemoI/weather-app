@@ -26,6 +26,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
 import java.util.Objects
+import kotlin.math.roundToInt
 
 const val API_KEY = "cad9164de5444353a8770509240903"
 
@@ -69,7 +70,7 @@ class MainFragment : Fragment() {
     private fun updateCurrentCard() = with(binding) {
         model.liveDataCurrent.observe(viewLifecycleOwner){
             val maxMinTemp = "${it.maxTemp}°C/${it.minTemp}°C"
-            val currentTemp = "${it.currentTemp}°C"
+            val currentTemp = "${it.currentTemp.toDouble().roundToInt()}°C"
             tvData.text = it.time
             tvCity.text = it.city
             tvCurrentTemp.text = currentTemp
@@ -138,6 +139,7 @@ class MainFragment : Fragment() {
             )
             list.add(item)
         }
+        model.liveDataList.value = list
         return list
     }
 

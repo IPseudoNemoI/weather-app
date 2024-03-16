@@ -56,7 +56,7 @@ class HoursFragment : Fragment() {
                 wItem.city,
                 (hoursArray[i] as JSONObject).getString("time"),
                 (hoursArray[i] as JSONObject).getJSONObject("condition").getString("text"),
-                (hoursArray[i] as JSONObject).getString("temp_c"),
+                ("${(hoursArray[i] as JSONObject).getString("temp_c")}°C"),
                 "",
                 "",
                 (hoursArray[i] as JSONObject).getJSONObject("condition").getString("icon"),
