@@ -3,29 +3,25 @@ package com.example.weatherapp.fragments
 import android.Manifest
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TableLayout
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.example.weatherapp.MainViewModel
-import com.example.weatherapp.R
 import com.example.weatherapp.adapters.VpAdapter
 import com.example.weatherapp.adapters.WeatherModel
 import com.example.weatherapp.databinding.FragmentMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
-import java.util.Objects
 import kotlin.math.roundToInt
 
 const val API_KEY = "cad9164de5444353a8770509240903"
@@ -59,41 +55,47 @@ class MainFragment : Fragment() {
         requestWeatherData("Novosibirsk")
     }
 
-    private fun init() = with(binding){
+    private fun init() = with(binding) {
         val adapter = VpAdapter(activity as FragmentActivity, fList)
         vp.adapter = adapter
-        TabLayoutMediator(tabLayout, vp){
-            tab, pos -> tab.text = tList[pos]
+        TabLayoutMediator(tabLayout, vp) { tab, pos ->
+            tab.text = tList[pos]
         }.attach()
     }
 
     private fun updateCurrentCard() = with(binding) {
-        model.liveDataCurrent.observe(viewLifecycleOwner){
+        model.liveDataCurrent.observe(viewLifecycleOwner) {
             val maxMinTemp = "${it.maxTemp}°C/${it.minTemp}°C"
-            val currentTemp = "${it.currentTemp.toDouble().roundToInt()}°C"
+            val maxMinTempRound =
+                "${it.maxTemp.toDouble().roundToInt()}°C/${it.minTemp.toDouble().roundToInt()}°C"
+            val currentTemp = if (it.currentTemp.isNotEmpty()) {
+                "${it.currentTemp.toDouble().roundToInt()}°C"
+            } else {
+                ""
+            }
             tvData.text = it.time
             tvCity.text = it.city
-            tvCurrentTemp.text = currentTemp.ifEmpty { maxMinTemp }
+            tvCurrentTemp.text = if (it.currentTemp.isEmpty()) maxMinTempRound else currentTemp
             tvCondition.text = it.condition
-            tvMaxMin.text = if(it.currentTemp.isEmpty()) "" else maxMinTemp
+            tvMaxMin.text = if (it.currentTemp.isEmpty()) "" else maxMinTemp
             Picasso.get().load("https:" + it.imageUrl).into(imWeather)
         }
     }
 
-    private fun permissionListener(){
-        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
+    private fun permissionListener() {
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
             Toast.makeText(activity, "Permission is $it", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun checkPermission(){
-        if(!isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)){
+    private fun checkPermission() {
+        if (!isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
             permissionListener()
             pLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    private fun requestWeatherData(city: String){
+    private fun requestWeatherData(city: String) {
         val url = "https://api.weatherapi.com/v1/forecast.json?key=" +
                 API_KEY +
                 "&q=" +
@@ -105,11 +107,11 @@ class MainFragment : Fragment() {
         val request = StringRequest(
             Request.Method.GET,
             url,
-            {
-                result -> parseWeatherData(result)
+            { result ->
+                parseWeatherData(result)
             },
-            {
-                error -> Log.d("MyLog", "Error: $error")
+            { error ->
+                Log.d("MyLog", "Error: $error")
             }
         )
         queue.add(request)
@@ -121,11 +123,11 @@ class MainFragment : Fragment() {
         parseCurrentData(mainObject, list[0])
     }
 
-    private fun parseDays(mainObject: JSONObject): List <WeatherModel> {
+    private fun parseDays(mainObject: JSONObject): List<WeatherModel> {
         val list = ArrayList<WeatherModel>()
         val daysArray = mainObject.getJSONObject("forecast").getJSONArray("forecastday")
         val name = mainObject.getJSONObject("location").getString("name")
-        for (i in 0 until daysArray.length()){
+        for (i in 0 until daysArray.length()) {
             val day = daysArray[i] as JSONObject
             val item = WeatherModel(
                 name,
@@ -143,7 +145,7 @@ class MainFragment : Fragment() {
         return list
     }
 
-    private fun parseCurrentData(mainObject: JSONObject, weatherItem: WeatherModel){
+    private fun parseCurrentData(mainObject: JSONObject, weatherItem: WeatherModel) {
         val item = WeatherModel(
             mainObject.getJSONObject("location").getString("name"),
             mainObject.getJSONObject("current").getString("last_updated"),
