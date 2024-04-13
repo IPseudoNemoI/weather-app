@@ -1,7 +1,7 @@
 package com.example.weatherapp.retrofit
 
 data class WeatherForecast (
-    val forecastDay: List<WeatherForecastDay>,
+    val forecastday: List<WeatherForecastDay>,
 )
 
 data class WeatherForecastDay(

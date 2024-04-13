@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -200,16 +201,16 @@ class MainFragment : Fragment() {
     private fun parseDays(response: WeatherResponse): List<WeatherModel> {
         val list = ArrayList<WeatherModel>()
 
-        for(i in 0 until response.forecast.forecastDay.size) {
-            val logged = response.forecast.forecastDay[i].hour
+        for(i in 0 until response.forecast.forecastday.size) {
+            val logged = response.forecast.forecastday[i].hour
             val item = WeatherModel(
                 city = response.location.name,
-                time = response.forecast.forecastDay[i].date,
-                condition = response.forecast.forecastDay[i].day.condition.text,
+                time = response.forecast.forecastday[i].date,
+                condition = response.forecast.forecastday[i].day.condition.text,
                 currentTemp = "",
-                maxTemp = response.forecast.forecastDay[i].day.maxtemp_c,
-                minTemp = response.forecast.forecastDay[i].day.mintemp_c,
-                imageUrl = response.forecast.forecastDay[i].day.condition.icon,
+                maxTemp = response.forecast.forecastday[i].day.maxtemp_c,
+                minTemp = response.forecast.forecastday[i].day.mintemp_c,
+                imageUrl = response.forecast.forecastday[i].day.condition.icon,
                 logged,
             )
             list.add(item)
