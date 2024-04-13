@@ -1,6 +1,6 @@
 package com.example.weatherapp.retrofit
 
-data class WeatherModel (
+data class WeatherModel(
     val city: String,
     val time: String,
     val condition: String,

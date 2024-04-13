@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -90,7 +89,7 @@ class MainFragment : Fragment() {
             checkLocation()
         }
         ibSearch.setOnClickListener {
-            DialogManager.searchByNameDialog(requireContext(), object : DialogManager.Listener{
+            DialogManager.searchByNameDialog(requireContext(), object : DialogManager.Listener {
                 override fun onClick(name: String?) {
                     name?.let { it1 -> requestWeatherData(it1) }
                 }
@@ -99,10 +98,10 @@ class MainFragment : Fragment() {
     }
 
     private fun checkLocation() {
-        if(isLocationEnabled()) {
+        if (isLocationEnabled()) {
             getLocation()
         } else {
-            DialogManager.locationSettingsDialog(requireContext(), object : DialogManager.Listener{
+            DialogManager.locationSettingsDialog(requireContext(), object : DialogManager.Listener {
                 override fun onClick(name: String?) {
                     startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                 }
@@ -194,14 +193,16 @@ class MainFragment : Fragment() {
             convertedResponse(value)
         }
     }
+
     private fun convertedResponse(response: WeatherResponse) {
         val list = parseDays(response)
         parseCurrentData(response, list[0])
     }
+
     private fun parseDays(response: WeatherResponse): List<WeatherModel> {
         val list = ArrayList<WeatherModel>()
 
-        for(i in 0 until response.forecast.forecastday.size) {
+        for (i in 0 until response.forecast.forecastday.size) {
             val logged = response.forecast.forecastday[i].hour
             val item = WeatherModel(
                 city = response.location.name,

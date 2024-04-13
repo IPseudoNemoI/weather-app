@@ -1,8 +1,8 @@
 package com.example.weatherapp.retrofit
 
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
+
 interface RequestApi {
     @GET("forecast.json")
     suspend fun getWeather(

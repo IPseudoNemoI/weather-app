@@ -10,9 +10,9 @@ import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ListItemBinding
 import com.example.weatherapp.retrofit.WeatherModel
 import com.squareup.picasso.Picasso
-import kotlin.math.roundToInt
 
-class WeatherAdapter(val listener: Listener?) : ListAdapter<WeatherModel, WeatherAdapter.Holder>(Comparator()) {
+class WeatherAdapter(val listener: Listener?) :
+    ListAdapter<WeatherModel, WeatherAdapter.Holder>(Comparator()) {
     class Holder(view: View, val listener: Listener?) : RecyclerView.ViewHolder(view) {
         val binding = ListItemBinding.bind(view)
         var itemTemp: WeatherModel? = null

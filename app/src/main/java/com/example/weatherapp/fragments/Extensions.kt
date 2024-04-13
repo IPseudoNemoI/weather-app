@@ -7,5 +7,6 @@ import androidx.fragment.app.Fragment
 
 fun Fragment.isPermissionGranted(p: String): Boolean {
     return ContextCompat.checkSelfPermission(
-        activity as AppCompatActivity, p) == PackageManager.PERMISSION_GRANTED
+        activity as AppCompatActivity, p
+    ) == PackageManager.PERMISSION_GRANTED
 }
