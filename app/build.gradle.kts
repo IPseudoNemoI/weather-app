@@ -39,6 +39,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.logging.interceptor)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit2.retrofit)
+    implementation(libs.converter.gson)
     implementation(libs.volley)
     implementation(libs.picasso)
     implementation(libs.androidx.fragment.ktx)

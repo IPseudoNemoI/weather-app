@@ -1,4 +1,4 @@
-package com.example.weatherapp.adapters
+package com.example.weatherapp.retrofit
 
 data class WeatherModel (
     val city: String,
@@ -8,5 +8,8 @@ data class WeatherModel (
     val maxTemp: String,
     val minTemp: String,
     val imageUrl: String,
-    val hours: String
+    val hours: List<WeatherHour>?
 )
+
+
+

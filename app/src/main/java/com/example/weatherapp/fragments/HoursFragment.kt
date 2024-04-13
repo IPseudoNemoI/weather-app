@@ -1,7 +1,6 @@
 package com.example.weatherapp.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,9 +8,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.MainViewModel
-import com.example.weatherapp.R
 import com.example.weatherapp.adapters.WeatherAdapter
-import com.example.weatherapp.adapters.WeatherModel
+import com.example.weatherapp.retrofit.WeatherModel
 import com.example.weatherapp.databinding.FragmentHoursBinding
 import org.json.JSONArray
 import org.json.JSONObject
@@ -53,13 +51,13 @@ class HoursFragment : Fragment() {
         for(i in 0 until hoursArray.length()){
             val item = WeatherModel(
                 wItem.city,
-                (hoursArray[i] as JSONObject).getString("time"),
-                (hoursArray[i] as JSONObject).getJSONObject("condition").getString("text"),
-                ("${(hoursArray[i] as JSONObject).getString("temp_c")}°C"),
+                wItem.hours!![i].time.split(" ")[1],
+                wItem.hours!![i].condition.text,
+                wItem.hours!![i].temp_c.toString() + "°C",
                 "",
                 "",
-                (hoursArray[i] as JSONObject).getJSONObject("condition").getString("icon"),
-                ""
+                wItem.hours!![i].condition.icon,
+                null,
             )
             list.add(item)
         }

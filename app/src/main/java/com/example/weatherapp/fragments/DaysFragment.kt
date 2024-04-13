@@ -6,11 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.MainViewModel
 import com.example.weatherapp.adapters.WeatherAdapter
-import com.example.weatherapp.adapters.WeatherModel
+import com.example.weatherapp.retrofit.WeatherModel
 import com.example.weatherapp.databinding.FragmentDaysBinding
 
 class DaysFragment : Fragment(), WeatherAdapter.Listener {

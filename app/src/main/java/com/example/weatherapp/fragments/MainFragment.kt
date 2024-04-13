@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,22 +17,28 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
-import com.android.volley.Request
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.example.weatherapp.DialogManager
 import com.example.weatherapp.MainViewModel
 import com.example.weatherapp.adapters.VpAdapter
-import com.example.weatherapp.adapters.WeatherModel
 import com.example.weatherapp.databinding.FragmentMainBinding
+import com.example.weatherapp.retrofit.RequestApi
+import com.example.weatherapp.retrofit.WeatherModel
+import com.example.weatherapp.retrofit.WeatherResponse
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.squareup.picasso.Picasso
-import org.json.JSONObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.math.roundToInt
 
 const val API_KEY = "cad9164de5444353a8770509240903"
@@ -161,67 +166,70 @@ class MainFragment : Fragment() {
     }
 
     private fun requestWeatherData(city: String) {
-        val url = "https://api.weatherapi.com/v1/forecast.json?key=" +
-                API_KEY +
-                "&q=" +
-                city +
-                "&days=" +
-                "3" +
-                "&aqi=no&alerts=no"
-        val queue = Volley.newRequestQueue(context)
-        val request = StringRequest(
-            Request.Method.GET,
-            url,
-            { result ->
-                parseWeatherData(result)
-            },
-            { error ->
-                Log.d("MyLog", "Error: $error")
-            }
-        )
-        queue.add(request)
-    }
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.level = HttpLoggingInterceptor.Level.BODY
 
-    private fun parseWeatherData(result: String) {
-        val mainObject = JSONObject(result)
-        val list = parseDays(mainObject)
-        parseCurrentData(mainObject, list[0])
-    }
+        val client = OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
 
-    private fun parseDays(mainObject: JSONObject): List<WeatherModel> {
+        val gson: Gson = GsonBuilder().create()
+
+        val requestWeatherData = Retrofit.Builder()
+            .baseUrl("https://api.weatherapi.com/v1/").client(client)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+
+        val requestValue = requestWeatherData.create(RequestApi::class.java)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val value = requestValue.getWeather(
+                key = API_KEY,
+                q = city,
+                days = "3",
+                aqi = "no",
+                alerts = "no"
+            )
+            convertedResponse(value)
+        }
+    }
+    private fun convertedResponse(response: WeatherResponse) {
+        val list = parseDays(response)
+        parseCurrentData(response, list[0])
+    }
+    private fun parseDays(response: WeatherResponse): List<WeatherModel> {
         val list = ArrayList<WeatherModel>()
-        val daysArray = mainObject.getJSONObject("forecast").getJSONArray("forecastday")
-        val name = mainObject.getJSONObject("location").getString("name")
-        for (i in 0 until daysArray.length()) {
-            val day = daysArray[i] as JSONObject
+
+        for(i in 0 until response.forecast.forecastDay.size) {
+            val logged = response.forecast.forecastDay[i].hour
             val item = WeatherModel(
-                name,
-                day.getString("date"),
-                day.getJSONObject("day").getJSONObject("condition").getString("text"),
-                "",
-                day.getJSONObject("day").getString("maxtemp_c"),
-                day.getJSONObject("day").getString("mintemp_c"),
-                day.getJSONObject("day").getJSONObject("condition").getString("icon"),
-                day.getJSONArray("hour").toString()
+                city = response.location.name,
+                time = response.forecast.forecastDay[i].date,
+                condition = response.forecast.forecastDay[i].day.condition.text,
+                currentTemp = "",
+                maxTemp = response.forecast.forecastDay[i].day.maxtemp_c,
+                minTemp = response.forecast.forecastDay[i].day.mintemp_c,
+                imageUrl = response.forecast.forecastDay[i].day.condition.icon,
+                logged,
             )
             list.add(item)
         }
-        model.liveDataList.value = list
+        model.liveDataList.postValue(list)
         return list
     }
 
-    private fun parseCurrentData(mainObject: JSONObject, weatherItem: WeatherModel) {
+    private fun parseCurrentData(response: WeatherResponse, weatherItem: WeatherModel) {
         val item = WeatherModel(
-            mainObject.getJSONObject("location").getString("name"),
-            mainObject.getJSONObject("current").getString("last_updated"),
-            mainObject.getJSONObject("current").getJSONObject("condition").getString("text"),
-            mainObject.getJSONObject("current").getString("temp_c"),
-            weatherItem.maxTemp,
-            weatherItem.minTemp,
-            mainObject.getJSONObject("current").getJSONObject("condition").getString("icon"),
-            weatherItem.hours
+            city = response.location.name,
+            time = response.current.last_updated,
+            condition = response.current.condition.text,
+            currentTemp = response.current.temp_c.toString(),
+            maxTemp = weatherItem.maxTemp,
+            minTemp = weatherItem.minTemp,
+            imageUrl = response.current.condition.icon,
+            hours = weatherItem.hours,
         )
-        model.liveDataCurrent.value = item
+        model.liveDataCurrent.postValue(item)
 
     }
 

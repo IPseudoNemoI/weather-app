@@ -8,28 +8,31 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ListItemBinding
+import com.example.weatherapp.retrofit.WeatherModel
 import com.squareup.picasso.Picasso
 import kotlin.math.roundToInt
 
 class WeatherAdapter(val listener: Listener?) : ListAdapter<WeatherModel, WeatherAdapter.Holder>(Comparator()) {
-    class Holder(view: View, val listener: Listener?) : RecyclerView.ViewHolder(view){
+    class Holder(view: View, val listener: Listener?) : RecyclerView.ViewHolder(view) {
         val binding = ListItemBinding.bind(view)
         var itemTemp: WeatherModel? = null
+
         init {
-            itemView.setOnClickListener{
+            itemView.setOnClickListener {
                 itemTemp?.let { it1 -> listener?.onClick(it1) }
             }
         }
+
         fun bind(item: WeatherModel) = with(binding) {
             itemTemp = item
             tvDate.text = item.time
             tvCondition.text = item.condition
-            tvTemp.text = item.currentTemp.ifEmpty { "${item.maxTemp.toDouble().roundToInt()}°C/${item.minTemp.toDouble().roundToInt()}°C" }
+            tvTemp.text = item.currentTemp.ifEmpty { "${item.maxTemp}°C/${item.minTemp}°C" }
             Picasso.get().load("https:" + item.imageUrl).into(im)
         }
     }
 
-    class Comparator : DiffUtil.ItemCallback<WeatherModel>(){
+    class Comparator : DiffUtil.ItemCallback<WeatherModel>() {
         override fun areItemsTheSame(oldItem: WeatherModel, newItem: WeatherModel): Boolean {
             return oldItem == newItem
         }
