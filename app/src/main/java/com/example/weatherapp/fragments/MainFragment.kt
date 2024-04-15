@@ -41,7 +41,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.math.roundToInt
 
-const val API_KEY = "cad9164de5444353a8770509240903"
+const val API_KEY = "YOUR API KEY"
 
 class MainFragment : Fragment() {
     private lateinit var fLocationClient: FusedLocationProviderClient
